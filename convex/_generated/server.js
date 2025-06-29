@@ -1,3 +1,4 @@
+/* eslint-disable */
 /**
  * Generated utilities for implementing server-side Convex query and mutation functions.
  *
@@ -43,8 +44,7 @@ export const internalQuery = internalQueryGeneric;
  * This function will be allowed to modify your Convex database and will be accessible from the client.
  *
  * @param func - The mutation function. It receives a {@link MutationCtx} as its first argument.
- * @returns The wrapped mutation. Include this as an `export` to name it and make it accessible. /
- *
+ * @returns The wrapped mutation. Include this as an `export` to name it and make it accessible.
  */
 export const mutation = mutationGeneric;
 
