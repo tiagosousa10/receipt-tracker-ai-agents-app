@@ -1,15 +1,36 @@
 "use client";
 
+import { useUser } from "@clerk/clerk-react";
 import {
   DndContext,
   useSensor,
   useSensors,
   PointerSensor,
 } from "@dnd-kit/core";
-import { useCallback, useState } from "react";
+import { useSchematicEntitlement } from "@schematichq/schematic-react";
+import { useRouter } from "next/navigation";
+import { useCallback, useRef, useState } from "react";
 
 const PDFDropzone = () => {
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadedFiles, setUploadedFiles] = useState<string[]>([]);
   const [isDraggingOver, setIsDraggingOver] = useState(false);
+
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const { user } = useUser();
+  const router = useRouter();
+
+  const {
+    value: isFeatureEnabled,
+    featureUsageExceeded,
+    featureUsage,
+    featureAllocation,
+  } = useSchematicEntitlement("scans");
+  console.log("🚀 ~ PDFDropzone ~ featureUsage:", featureUsage);
+  console.log("🚀 ~ PDFDropzone ~ isFeatureEnabled:", isFeatureEnabled);
+  console.log("🚀 ~ PDFDropzone ~ featureAllocation:", featureAllocation);
+  console.log("🚀 ~ PDFDropzone ~ featureUsageExceeded:", featureUsageExceeded);
+
   //set up sensors for drag and drop
   const sensors = useSensors(useSensor(PointerSensor));
 
@@ -18,6 +39,20 @@ const PDFDropzone = () => {
     e.preventDefault();
     setIsDraggingOver(true);
   }, []);
+
+  const handleDragLeave = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDraggingOver(false);
+  }, []);
+
+  const handleDrop = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDraggingOver(false);
+    console.log("dropped");
+  }, []);
+
+  //   const canUpload = isUserSignedIn && isFeatureEnabled;
+  const canUpload = true;
 
   return (
     <DndContext sensors={sensors}>
