@@ -92,3 +92,59 @@ export const getReceiptDownloadUrl = query({
     return await ctx.storage.getUrl(args.fieldId);
   },
 });
+
+//update the status for the receipt
+export const updateReceiptStatus = mutation({
+  args: {
+    id: v.id("receipts"),
+    status: v.string(),
+  },
+  handler: async (ctx, args) => {
+    // verify user has access to this receipt
+    const receipt = await ctx.db.get(args.id);
+    if (!receipt) {
+      throw new Error("Receipt not found");
+    }
+
+    const identify = await ctx.auth.getUserIdentity();
+    if (!identify) {
+      throw new Error("Unauthorized");
+    }
+
+    const userId = identify.subject;
+    if (receipt.userId !== userId) {
+      throw new Error("Unauthorized access to receipt");
+    }
+
+    // update the status
+    await ctx.db.patch(args.id, { status: args.status });
+    return true;
+  },
+});
+
+//delete a receipt
+export const deleteReceipt = mutation({
+  args: {
+    id: v.id("receipts"),
+  },
+  handler: async (ctx, args) => {
+    const receipt = await ctx.db.get(args.id);
+    if (!receipt) {
+      throw new Error("Receipt not found");
+    }
+
+    const identify = await ctx.auth.getUserIdentity();
+    if (!identify) {
+      throw new Error("Unauthorized");
+    }
+
+    const userId = identify.subject;
+    if (receipt.userId !== userId) {
+      throw new Error("Unauthorized access to receipt");
+    }
+
+    await ctx.db.delete(args.id);
+
+    return true;
+  },
+});
