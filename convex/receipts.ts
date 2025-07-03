@@ -143,8 +143,59 @@ export const deleteReceipt = mutation({
       throw new Error("Unauthorized access to receipt");
     }
 
+    // delete the file
+    await ctx.storage.delete(receipt.fileId);
+    // delete the receipt record
     await ctx.db.delete(args.id);
 
     return true;
+  },
+});
+
+//update a receipt with extracted data
+export const updateReceiptWithExtractedData = mutation({
+  args: {
+    id: v.id("receipts"),
+    fileDisplayName: v.string(),
+    merchantName: v.string(),
+    merchantAddress: v.string(),
+    merchantContact: v.string(),
+    transactionDate: v.string(),
+    transactionAmount: v.string(),
+    currency: v.string(),
+    receiptSummary: v.string(),
+    items: v.array(
+      v.object({
+        name: v.string(),
+        quantity: v.number(),
+        unitPrice: v.number(),
+        totalPrice: v.number(),
+      }),
+    ),
+  },
+  handler: async (ctx, args) => {
+    //verify the receipt
+    const receipt = await ctx.db.get(args.id);
+    if (!receipt) {
+      throw new Error("Receipt not found");
+    }
+
+    //update the receipt with extracted data
+    await ctx.db.patch(args.id, {
+      fileDisplayName: args.fileDisplayName,
+      merchantName: args.merchantName,
+      merchantAddress: args.merchantAddress,
+      merchantContact: args.merchantContact,
+      transactionDate: args.transactionDate,
+      transactionAmount: args.transactionAmount,
+      currency: args.currency,
+      receiptSummary: args.receiptSummary,
+      items: args.items,
+      status: "processed", // mark as processed now that we have extracted data
+    });
+
+    return {
+      userId: receipt.userId, // contains information about the receipt
+    };
   },
 });
