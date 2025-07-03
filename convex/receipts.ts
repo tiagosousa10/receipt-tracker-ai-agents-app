@@ -57,3 +57,38 @@ export const getReceipts = query({
       .collect();
   },
 });
+
+export const getReceiptById = query({
+  args: {
+    id: v.id("receipts"),
+  },
+  handler: async (ctx, args) => {
+    //get the receipt
+    const receipt = await ctx.db.get(args.id);
+
+    //verify user has access to this receipt
+    if (receipt) {
+      const identify = await ctx.auth.getUserIdentity();
+      if (!identify) {
+        throw new Error("Unauthorized");
+      }
+
+      const userId = identify.subject;
+      if (receipt.userId !== userId) {
+        throw new Error("Unauthorized access to receipt");
+      }
+    }
+
+    return receipt;
+  },
+});
+
+// generate a receipt download url
+export const getReceiptDownloadUrl = query({
+  args: {
+    fieldId: v.id("_storage"),
+  },
+  handler: async (ctx, args) => {
+    return await ctx.storage.getUrl(args.fieldId);
+  },
+});
