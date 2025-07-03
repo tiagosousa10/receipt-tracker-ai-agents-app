@@ -26,13 +26,67 @@ const PDFDropzone = () => {
     featureUsage,
     featureAllocation,
   } = useSchematicEntitlement("scans");
-  console.log("🚀 ~ PDFDropzone ~ featureUsage:", featureUsage);
-  console.log("🚀 ~ PDFDropzone ~ isFeatureEnabled:", isFeatureEnabled);
-  console.log("🚀 ~ PDFDropzone ~ featureAllocation:", featureAllocation);
-  console.log("🚀 ~ PDFDropzone ~ featureUsageExceeded:", featureUsageExceeded);
 
   //set up sensors for drag and drop
   const sensors = useSensors(useSensor(PointerSensor));
+
+  const handleUpload = useCallback(
+    async (files: FileList | File[]) => {
+      if (!user) {
+        alert("Please sign in to upload files");
+        return;
+      }
+
+      const fileArray = Array.from(files); // means you can upload multiple files at once
+      const pdfFiles = fileArray.filter(
+        (file) =>
+          file.type === "application/pdf" ||
+          file.name.toLowerCase().endsWith(".pdf"),
+      );
+
+      if (pdfFiles.length === 0) {
+        alert("Please upload a PDF file");
+        return;
+      }
+
+      setIsUploading(true); // start the upload process
+
+      try {
+        //Upload the files
+        const newUploadedFiles: string[] = [];
+        for (const file of pdfFiles) {
+          const formData = new FormData();
+          formData.append("file", file);
+
+          //call the server action to handle the upload
+          const result = await uploadPDF(formData);
+
+          if (!result.success) {
+            throw new Error(result.error);
+          }
+
+          newUploadedFiles.push(file.name);
+        }
+
+        setUploadedFiles((prev) => [...prev, ...newUploadedFiles]);
+
+        //clear uploaded files list after 5 seconds
+        setTimeout(() => {
+          setUploadedFiles([]);
+        }, 5000);
+
+        router.push("/receipts");
+      } catch (error) {
+        console.error("Error uploading files:", error);
+        alert(
+          `Upload failed: ${error instanceof Error ? error.message : "Unknown error"}`,
+        );
+      } finally {
+        setIsUploading(false);
+      }
+    },
+    [user, router],
+  );
 
   //handle file drop via native browser events for better PDF support
   const handleDragOver = useCallback((e: React.DragEvent) => {
@@ -45,11 +99,22 @@ const PDFDropzone = () => {
     setIsDraggingOver(false);
   }, []);
 
-  const handleDrop = useCallback((e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDraggingOver(false);
-    console.log("dropped");
-  }, []);
+  const handleDrop = useCallback(
+    (e: React.DragEvent) => {
+      e.preventDefault();
+      setIsDraggingOver(false);
+
+      if (!user) {
+        alert("Please sign in to upload files");
+        return;
+      }
+
+      if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+        handleUpload(e.dataTransfer.files);
+      }
+    },
+    [user, handleUpload],
+  );
 
   //   const canUpload = isUserSignedIn && isFeatureEnabled;
   const canUpload = true;
