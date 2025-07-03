@@ -43,3 +43,17 @@ export const storeReceipt = mutation({
     return receiptId;
   },
 });
+
+export const getReceipts = query({
+  args: {
+    userId: v.string(),
+  },
+  handler: async (ctx, args) => {
+    //only return receipts for the authenticated user
+    return await ctx.db
+      .query("receipts")
+      .filter((q) => q.eq(q.field("userId"), args.userId))
+      .order("desc")
+      .collect();
+  },
+});
