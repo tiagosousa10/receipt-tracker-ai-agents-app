@@ -1,14 +1,26 @@
 "use client";
 
 import { api } from "@/convex/_generated/api";
-import { useUser } from "@clerk/clerk-react";
 import { useQuery } from "convex/react";
+import { useUser } from "@clerk/nextjs";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Doc } from "@/convex/_generated/dataModel";
+import { useRouter } from "next/navigation";
+import { FileText } from "lucide-react";
 
 const ReceiptList = () => {
   const { user } = useUser();
   const receipts = useQuery(api.receipts.getReceipts, {
     userId: user?.id || "",
   });
+  const router = useRouter();
 
   if (!user) {
     return (
@@ -35,7 +47,40 @@ const ReceiptList = () => {
     );
   }
 
-  return <div>ReceiptList</div>;
+  return (
+    <div>
+      <h2 className="text-2xl font-semibold mb-4">Your Receipts</h2>
+      <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead className="w-[40px]"></TableHead>
+              <TableHead>Name</TableHead>
+              <TableHead>Uploaded</TableHead>
+              <TableHead>Size</TableHead>
+              <TableHead>Total</TableHead>
+              <TableHead>Status</TableHead>
+              <TableHead className="w-[40px]"></TableHead>
+            </TableRow>
+          </TableHeader>
+
+          <TableBody>
+            {receipts.map((receipt: Doc<"receipts">) => (
+              <TableRow
+                key={receipt._id}
+                className="cursor-pointer hover:bg-gray-50"
+                onClick={() => router.push(`/receipts/${receipt._id}`)}
+              >
+                <TableCell className="py-2">
+                  <FileText className="size-6 text-red-500" />
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
+    </div>
+  );
 };
 
 export default ReceiptList;

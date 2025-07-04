@@ -1,4 +1,5 @@
 import PDFDropzone from "@/components/PDFDropzone";
+import ReceiptList from "@/components/ReceiptList";
 
 const Receipts = () => {
   return (
@@ -7,6 +8,7 @@ const Receipts = () => {
         {/* PDF drop zone */}
         <PDFDropzone />
         {/* Receipt list */}
+        <ReceiptList />
       </div>
     </div>
   );
