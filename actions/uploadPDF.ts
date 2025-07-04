@@ -64,6 +64,16 @@ export async function uploadPDF(formData: FormData) {
 
     //generate the file url
     const fileUrl = await getFileDownloadUrl(storageId);
+
+    //TOD: trigger innges agent flow...
+
+    return {
+      success: true,
+      data: {
+        receiptId,
+        fileName: file.name,
+      },
+    };
   } catch (error) {
     console.error("Server action upload PDF failed:", error);
     return {
