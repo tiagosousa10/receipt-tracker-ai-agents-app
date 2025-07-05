@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/table";
 import { Doc } from "@/convex/_generated/dataModel";
 import { useRouter } from "next/navigation";
-import { FileText } from "lucide-react";
+import { ChevronRight, FileText } from "lucide-react";
 
 const ReceiptList = () => {
   const { user } = useUser();
@@ -85,6 +85,18 @@ const ReceiptList = () => {
                   {receipt.transactionAmount
                     ? `${receipt.transactionAmount} ${receipt.currency} || ""`
                     : "-"}
+                </TableCell>
+                <TableCell>
+                  <span
+                    className={`px-2 py-1 rounded-full text-xs ${receipt.status === "pending" ? "bg-yellow-100 text-yellow-800" : receipt.status === "processed" ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"}`}
+                  >
+                    {receipt.status.charAt(0).toUpperCase() +
+                      receipt.status.slice(1)}{" "}
+                    {/* capitalize the first letter */}
+                  </span>
+                </TableCell>
+                <TableCell className="text-right">
+                  <ChevronRight className="size-5 text-gray-400 ml-auto" />
                 </TableCell>
               </TableRow>
             ))}
