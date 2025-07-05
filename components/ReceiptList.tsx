@@ -74,6 +74,18 @@ const ReceiptList = () => {
                 <TableCell className="py-2">
                   <FileText className="size-6 text-red-500" />
                 </TableCell>
+                <TableCell className="font-medium">
+                  {receipt.fileDisplayName || receipt.fileName}
+                </TableCell>
+                <TableCell>
+                  {new Date(receipt.uploadedAt).toLocaleDateString()}
+                </TableCell>
+                <TableCell>{formatFileSize(receipt.size)}</TableCell>
+                <TableCell>
+                  {receipt.transactionAmount
+                    ? `${receipt.transactionAmount} ${receipt.currency} || ""`
+                    : "-"}
+                </TableCell>
               </TableRow>
             ))}
           </TableBody>
