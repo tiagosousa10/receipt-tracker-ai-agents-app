@@ -96,3 +96,14 @@ const ReceiptList = () => {
 };
 
 export default ReceiptList;
+
+// helper function to format file size
+function formatFileSize(bytes: number): string {
+  if (bytes === 0) return "0 Bytes";
+
+  const k = 1024;
+  const sizes = ["Bytes", "KB", "MB", "GB"];
+  const i = Math.floor(Math.log(bytes) / Math.log(k)); // get the index with the largest power of 1024
+
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i]; // return the formatted size in the appropriate unit (KB, MB, GB, etc.)
+}
