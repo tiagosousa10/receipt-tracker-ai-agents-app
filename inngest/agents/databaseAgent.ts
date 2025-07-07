@@ -1,6 +1,7 @@
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 import convex from "@/lib/convexClient";
+import { client } from "@/lib/schematic";
 import { createAgent, createTool, openai } from "@inngest/agent-kit";
 import { z } from "zod";
 
@@ -42,7 +43,7 @@ const saveToDatabaseTool = createTool({
         ),
     ),
   }),
-  handler: async ({ params, context }) => {
+  handler: async (params, context) => {
     const {
       fileDisplayName,
       receiptId,
@@ -87,6 +88,20 @@ const saveToDatabaseTool = createTool({
               id: userId,
             },
           });
+
+          return {
+            addedToDb: "Success",
+            receiptId,
+            fileDisplayName,
+            merchantName,
+            merchantAddress,
+            merchantContact,
+            transactionDate,
+            transactionAmount,
+            receiptSummary,
+            currency,
+            items,
+          };
         } catch (error) {
           return {
             addedToDb: "Failed",

@@ -6,6 +6,7 @@ import {
 import { createServer } from "@inngest/agent-kit/server";
 import { inngest } from "./client";
 import Events from "./constants";
+import { databaseAgent } from "./agents/databaseAgent";
 
 const agentNetwork = createNetwork({
   name: "Agent Team",
