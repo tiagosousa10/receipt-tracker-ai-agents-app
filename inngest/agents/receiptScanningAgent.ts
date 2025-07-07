@@ -1,5 +1,79 @@
-import { createAgent } from "@inngest/agent-kit";
-import { openai } from "inngest";
+import { createAgent, createTool } from "@inngest/agent-kit";
+import { anthropic, openai } from "inngest";
+import z from "zod";
+
+const parsePdfTool = createTool({
+  name: "parse-pdf",
+  description: "Analyses the given PDF",
+  parameters: z.object({
+    pdfUrl: z.string(),
+  }),
+  handler: async ({ pdfUrl }, { step }) => {
+    try {
+      return await step?.ai.infer("parse-pdf", {
+        model: anthropic({
+          model: "claude-3-5-sonnet-20241022",
+          defaultParameters: {
+            max_tokens: 3094,
+          },
+        }),
+
+        body: {
+          messages: [
+            {
+              role: "user",
+              content: [
+                {
+                  type: "document",
+                  source: {
+                    type: "url",
+                    url: pdfUrl,
+                  },
+                },
+                {
+                  type: "text",
+                  text: `Extract the data from the receipt and return the structured output as follows: 
+                  {
+                     "merchant": {
+                        "name": "Store Name",
+                        "address": "123 Main St, City, Country",
+                        "contact": "+123456789",
+                     },
+                     "transaction": {
+                        "date": "YYYY-MM-DD",
+                        "receipt_number": "ABC123456",
+                        "payment_method": "Credit Card",
+                     },
+                     "items": [
+                        {
+                           "name" :"Item 1",
+                           "quantity": 2,
+                           "unit_price": 10.00,
+                           "total_price": 20.00
+                        }
+                     ],
+                     "totals" : {
+                        "subtotal": 20.00,
+                        "tax": 2.00,
+                        "total": 22.00
+                        "currency": "USD"
+                     }
+                  }`,
+                },
+              ],
+            },
+          ],
+        },
+      });
+    } catch (error) {
+      console.error("Error parsing PDF", error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : "Error parsing PDF",
+      };
+    }
+  },
+});
 
 export const receiptScanningAgent = createAgent({
   name: "Receipt Scanning Agent",
