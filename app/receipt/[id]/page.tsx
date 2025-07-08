@@ -2,21 +2,32 @@
 
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
-import { useQuery } from "convex/react";
+import { ChevronLeft } from "lucide-react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+
+import { useAuth } from "@clerk/nextjs";
+import { useQuery } from "convex/react";
 
 const Receipt = () => {
   const params = useParams<{ id: string }>();
   const [receiptId, setReceiptId] = useState<Id<"receipts"> | null>(null);
   const router = useRouter();
 
-  //fetch the receipt details
-  const receipt = useQuery(
-    api.receipts.getReceiptById,
-    receiptId ? { id: receiptId } : "skip",
-  );
+  const { userId } = useAuth();
+
+  //fetch the receipt details -> OLD VERSION
+  // const receipt = useQuery(
+  //   api.receipts.getReceiptById,
+  //   receiptId ? { id: receiptId } : "skip",
+  // );
+
+  //new version to fetch receipts
+  const receipt = useQuery(api.receipts.getReceiptById, {
+    id: receiptId ?? "", // provide a default value if receiptId is null
+    userId: userId!, // passa manualmente
+  });
 
   //get the download URL (for the view button)
   const fileId = receipt?.fileId;
@@ -67,7 +78,32 @@ const Receipt = () => {
     );
   }
 
-  return <div>receitp {params.id}</div>;
+  //format upload date
+  const uploadDate = new Date(receipt.uploadedAt).toLocaleString();
+
+  //check if receipt has extracted data
+  const hasExtractedData = !!(
+    receipt.merchantName ||
+    receipt.merchantAddress ||
+    receipt.transactionDate ||
+    receipt.transactionAmount
+  );
+
+  return (
+    <div className="container mx-auto py-10 px-4">
+      <div className="max-w-4xl mx-auto">
+        <nav>
+          <Link
+            href={"/receipts"}
+            className="text-blue-500 hover:underline flex items-center"
+          >
+            <ChevronLeft className="size-4 mr-1" />
+            Back to Receipts
+          </Link>
+        </nav>
+      </div>
+    </div>
+  );
 };
 
 export default Receipt;

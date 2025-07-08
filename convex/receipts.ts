@@ -58,25 +58,45 @@ export const getReceipts = query({
   },
 });
 
+//----------------------------OLD VERISON------------------------------------
+// export const getReceiptById = query({
+
+//   args: {
+//     id: v.id("receipts"),
+//   },
+//   handler: async (ctx, args) => {
+//     //get the receipt
+//     const receipt = await ctx.db.get(args.id);
+
+//     //verify user has access to this receipt -> TODO -> RESOLVER PROBLEMAS DE AUTENTICAÇAO
+//     if (receipt) {
+//       const identify = await ctx.auth.getUserIdentity();
+//       console.log("🚀 ~ handler: ~ identify:", identify);
+//       if (!identify) {
+//         throw new Error("Unauthorized");
+//       }
+
+//       const userId = identify.subject;
+//       if (receipt.userId !== userId) {
+//         throw new Error("Unauthorized access to receipt");
+//       }
+//     }
+
+//     return receipt;
+//   },
+// });
+
+//----------------------------NEW VERISON------------------------------------
 export const getReceiptById = query({
   args: {
     id: v.id("receipts"),
+    userId: v.string(), // <--- forçado manualmente
   },
   handler: async (ctx, args) => {
-    //get the receipt
     const receipt = await ctx.db.get(args.id);
 
-    //verify user has access to this receipt
-    if (receipt) {
-      const identify = await ctx.auth.getUserIdentity();
-      if (!identify) {
-        throw new Error("Unauthorized");
-      }
-
-      const userId = identify.subject;
-      if (receipt.userId !== userId) {
-        throw new Error("Unauthorized access to receipt");
-      }
+    if (!receipt || receipt.userId !== args.userId) {
+      throw new Error("Unauthorized");
     }
 
     return receipt;
