@@ -10,6 +10,15 @@ import { useEffect, useState } from "react";
 import { useAuth } from "@clerk/nextjs";
 import { useQuery } from "convex/react";
 import { useSchematicFlag } from "@schematichq/schematic-react";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableFooter,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
 const Receipt = () => {
   const params = useParams<{ id: string }>();
@@ -27,7 +36,7 @@ const Receipt = () => {
 
   //new version to fetch receipts
   const receipt = useQuery(api.receipts.getReceiptById, {
-    id: receiptId ?? "", // provide a default value if receiptId is null
+    id: receiptId ? receiptId : null, // provide a default value if receiptId is null
     userId: userId!, // passa manualmente
   });
 
@@ -308,6 +317,54 @@ const Receipt = () => {
             )}
 
             {/* items section */}
+            {receipt.items && receipt.items.length > 0 && (
+              <div className="mt-6">
+                <h4 className="font-medium text-gray-700 mb-3">
+                  Items ({receipt.items.length})
+                </h4>
+                <div className="overflow-x-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Item</TableHead>
+                        <TableHead>Quantity</TableHead>
+                        <TableHead>Unit Price</TableHead>
+                        <TableHead>Total</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {receipt.items.map((item, index) => (
+                        <TableRow key={index}>
+                          <TableCell className="font-medium">
+                            {item.name}
+                          </TableCell>
+                          <TableCell>{item.quantity}</TableCell>
+                          <TableCell>
+                            {formatCurrency(item.unitPrice, receipt.currency)}
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                    <TableFooter>
+                      <TableRow>
+                        <TableCell colSpan={3} className="text-right">
+                          Total
+                        </TableCell>
+                        <TableCell>
+                          {formatCurrency(
+                            receipt.items.reduce(
+                              (sum, item) => sum + item.totalPrice,
+                              0,
+                            ),
+                            receipt.currency,
+                          )}
+                        </TableCell>
+                      </TableRow>
+                    </TableFooter>
+                  </Table>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>
