@@ -2,7 +2,7 @@
 
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
-import { ChevronLeft } from "lucide-react";
+import { ChevronLeft, FileText } from "lucide-react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -155,7 +155,67 @@ const Receipt = () => {
                   </div>
                 </div>
               </div>
+
+              {/* download */}
+
+              <div className="flex items-center justify-center p-8 bg-gray-50 rounded-lg">
+                <div className="text-center">
+                  <FileText className="w-16 h-16 text-blue-500 mx-auto" />
+                  <p className="mt-4 text-sm text-gray-500">PDF Preview</p>
+                  {downloadUrl && (
+                    <a
+                      href={downloadUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="mt-4 px-4 py-2 bg-blue-500 text-white rounded text-sm hover:bg-blue-600 inline-block"
+                    >
+                      View PDF
+                    </a>
+                  )}
+                </div>
+              </div>
             </div>
+
+            {/* extracted data section */}
+            {hasExtractedData && (
+              <div className="mt-8">
+                <h3 className="text-lg font-semibold mb-4">Receipt Details</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {/* merchant details */}
+                  <div className="bg-gray-50 p-4 rounded-lg">
+                    <h4 className="font-medium text-gray-700 mb-3">
+                      Merchant Information
+                    </h4>
+                    <div className="space-y-2">
+                      {receipt.merchantName && (
+                        <div>
+                          <p className="text-sm text-gray-500">Name</p>
+                          <p className="font-medium">{receipt.merchantName}</p>
+                        </div>
+                      )}
+                      {receipt.merchantAddress && (
+                        <div>
+                          <p className="text-sm text-gray-500">Address</p>
+                          <p className="font-medium">
+                            {receipt.merchantAddress}
+                          </p>
+                        </div>
+                      )}
+                      {receipt.merchantContact && (
+                        <div>
+                          <p className="text-sm text-gray-500">Contact</p>
+                          <p className="font-medium">
+                            {receipt.merchantContact}
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* transaction details */}
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>
