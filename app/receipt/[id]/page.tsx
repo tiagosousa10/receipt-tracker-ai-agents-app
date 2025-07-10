@@ -19,12 +19,15 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { getFileDownloadUrl } from "@/actions/getFileDownloadUrl";
 
 const Receipt = () => {
   const params = useParams<{ id: string }>();
   const [receiptId, setReceiptId] = useState<Id<"receipts"> | null>(null);
   const router = useRouter();
   const isSummariesEnabled = useSchematicFlag("summary"); // Schematic flag -> from my AI Summary
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [isLoadingDownload, setIsLoadingDownload] = useState(false);
 
   const { userId } = useAuth();
 
@@ -46,6 +49,38 @@ const Receipt = () => {
     api.receipts.getReceiptDownloadUrl,
     fileId ? { fieldId: fileId } : "skip",
   );
+
+  const handleDownload = async () => {
+    if (!receipt || !receipt.fileId) return;
+
+    try {
+      setIsLoadingDownload(true);
+
+      //call the server action to get download URL
+      const result = await getFileDownloadUrl(receipt.fileId);
+
+      if (!result.success) {
+        throw new Error(result.error);
+      }
+
+      //create a temporary link and trigger download
+      const link = document.createElement("a");
+      if (result.downloadUrl) {
+        link.href = result.downloadUrl;
+        link.download = receipt.fileName || "receipt.pdf";
+        document.body.appendChild(link); // means that the link is added to the DOM
+        link.click();
+        document.body.removeChild(link);
+      } else {
+        throw new Error("Download URL not found");
+      }
+    } catch (error) {
+      console.error("Error downloading file", error);
+      alert("Failed to download the file. Please try again.");
+    } finally {
+      setIsLoadingDownload(false);
+    }
+  };
 
   useEffect(() => {
     try {
