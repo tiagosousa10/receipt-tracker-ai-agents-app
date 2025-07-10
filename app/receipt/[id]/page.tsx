@@ -97,7 +97,7 @@ const Receipt = () => {
           throw new Error(result.error);
         }
 
-        router.push("/");
+        router.push("/receipts");
       } catch (error) {
         console.error("Error deleting receipt", error);
         alert("Failed to delete the receipt. Please try again.");

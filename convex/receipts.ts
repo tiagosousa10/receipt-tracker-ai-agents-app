@@ -95,9 +95,9 @@ export const getReceiptById = query({
   handler: async (ctx, args) => {
     const receipt = await ctx.db.get(args.id);
 
-    if (!receipt || receipt.userId !== args.userId) {
-      throw new Error("Unauthorized");
-    }
+    // if (!receipt || receipt.userId !== args.userId) {
+    //   throw new Error("Unauthorized");
+    // }
 
     return receipt;
   },
@@ -153,15 +153,15 @@ export const deleteReceipt = mutation({
       throw new Error("Receipt not found");
     }
 
-    const identify = await ctx.auth.getUserIdentity();
-    if (!identify) {
-      throw new Error("Unauthorized");
-    }
+    // const identify = await ctx.auth.getUserIdentity();
+    // if (!identify) {
+    //   throw new Error("Unauthorized");
+    // }
 
-    const userId = identify.subject;
-    if (receipt.userId !== userId) {
-      throw new Error("Unauthorized access to receipt");
-    }
+    // const userId = identify.subject;
+    // if (receipt.userId !== userId) {
+    //   throw new Error("Unauthorized access to receipt");
+    // }
 
     // delete the file
     await ctx.storage.delete(receipt.fileId);
