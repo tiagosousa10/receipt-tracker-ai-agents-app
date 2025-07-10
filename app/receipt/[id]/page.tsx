@@ -20,6 +20,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { getFileDownloadUrl } from "@/actions/getFileDownloadUrl";
+import { deleteReceipt } from "@/actions/deleteReceipt";
 
 const Receipt = () => {
   const params = useParams<{ id: string }>();
@@ -79,6 +80,29 @@ const Receipt = () => {
       alert("Failed to download the file. Please try again.");
     } finally {
       setIsLoadingDownload(false);
+    }
+  };
+
+  const handleDeleteReceipt = async () => {
+    if (!receiptId) return;
+
+    if (window.confirm("Are you sure you want to delete this receipt?")) {
+      try {
+        setIsDeleting(true);
+
+        //call the server action to delete the receipt
+        const result = await deleteReceipt(receiptId);
+
+        if (!result.success) {
+          throw new Error(result.error);
+        }
+
+        router.push("/");
+      } catch (error) {
+        console.error("Error deleting receipt", error);
+        alert("Failed to delete the receipt. Please try again.");
+        setIsDeleting(false);
+      }
     }
   };
 
